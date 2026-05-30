@@ -12,7 +12,7 @@ AirPlay 기반으로 아이폰에 별도 앱 설치 없이, 제어 센터에서 
 |------|--------|------|
 | `Boida-v1.0.0-for-Windows-x64.exe` | Windows 10/11 | Windows 설치 파일 (권장) |
 | `Boida-v1.0.0-for-Mac-universal.dmg` | macOS (통합) | Apple Silicon + Intel 통합 |
-| `Boida-v1.0.0-for-Mac-arm64.dmg` | macOS Apple Silicon | M1 / M2 / M3 / M4 |
+| `Boida-v1.0.0-for-Mac-arm64.dmg` | macOS Apple Silicon | M1 이상 ~ |
 | `Boida-v1.0.0-for-Mac-intel-x64.dmg` | macOS Intel | 인텔 Mac 전용 |
 
 ---
