@@ -10,22 +10,22 @@ AirPlay 기반으로 아이폰에 별도 앱 설치 없이, 제어 센터에서 
 
 | 파일 | 플랫폼 | 설명 |
 |------|--------|------|
-| `Boida-v1.0.0-x64.exe` | Windows 10/11 | Windows 설치 파일 (권장) |
-| `Boida-v1.0.0-universal.dmg` | macOS (통합) | Apple Silicon + Intel 통합 |
-| `Boida-v1.0.0-arm64.dmg` | macOS Apple Silicon | M1 / M2 / M3 / M4 |
-| `Boida-v1.0.0-x64.dmg` | macOS Intel | 인텔 Mac 전용 |
+| `Boida-v1.0.0-for-Windows-x64.exe` | Windows 10/11 | Windows 설치 파일 (권장) |
+| `Boida-v1.0.0-for-Mac-universal.dmg` | macOS (통합) | Apple Silicon + Intel 통합 |
+| `Boida-v1.0.0-for-Mac-arm64.dmg` | macOS Apple Silicon | M1 / M2 / M3 / M4 |
+| `Boida-v1.0.0-for-Mac-intel-x64.dmg` | macOS Intel | 인텔 Mac 전용 |
 
 ---
 
 ## 🚀 사용 방법
 
 ### Windows
-1. `Boida-v1.0.0-x64.exe` 설치
+1. `Boida-v1.0.0-for-Windows-x64.exe` 설치
 2. **보이다** 앱 실행
 3. 아이폰 **제어 센터** → **화면 미러링** → **Boida@컴퓨터이름** 선택
 
 ### macOS
-1. `Boida-v1.0.0-universal.dmg` 설치
+1. `Boida-v1.0.0-for-Mac-universal.dmg` 설치
 2. 보이다 앱 실행
 3. 아이폰 **제어 센터** → **화면 미러링** → **보이다(Boida)** 선택
 
