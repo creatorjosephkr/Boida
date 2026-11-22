@@ -1,0 +1,49 @@
+{
+  "name": "boida-uninstaller",
+  "private": true,
+  "version": "1.0.0",
+  "main": "electron.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:all": "electron-builder --mac --win"
+  },
+  "build": {
+    "appId": "com.boida.uninstaller",
+    "productName": "Boida Uninstaller",
+    "artifactName": "Boida-Uninstaller-${arch}.${ext}",
+    "directories": {
+      "output": "dist-app"
+    },
+    "files": [
+      "electron.cjs",
+      "index.html",
+      "package.json",
+      "icon.iconset/**"
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": ["universal"]
+        }
+      ],
+      "icon": "../receiver/icon/boida_icon.png",
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "../receiver/icon/boida_icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.3.0",
+    "electron-builder": "^26.8.1"
+  }
+}

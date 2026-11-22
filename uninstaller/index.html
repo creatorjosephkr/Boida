@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boida Uninstaller</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:            #f5f5f7;
+      --surface:       #ffffff;
+      --surface2:      #f0f0f2;
+      --border:        rgba(0,0,0,0.09);
+      --border2:       rgba(0,0,0,0.06);
+      --text:          #1d1d1f;
+      --secondary:     #6e6e73;
+      --accent:        #ff3b30;
+      --accent-bg:     rgba(255,59,48,0.08);
+      --accent-border: rgba(255,59,48,0.22);
+      --green:         #34c759;
+      --green-bg:      rgba(52,199,89,0.10);
+      --yellow:        #ff9f0a;
+      --yellow-bg:     rgba(255,159,10,0.08);
+      --yellow-border: rgba(255,159,10,0.22);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* ── Titlebar ─────────────────────────────────────────────── */
+    .titlebar {
+      height: 38px;
+      -webkit-app-region: drag;
+      display: flex;
+      align-items: center;
+      /* Leave 72px on the left for traffic-light buttons */
+      padding: 0 16px 0 72px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .titlebar-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--secondary);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Main layout ──────────────────────────────────────────── */
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 38px);
+      padding: 22px 22px 18px;
+      overflow: hidden;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .app-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+    }
+    .app-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .header-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+      letter-spacing: -0.01em;
+    }
+    .header-text p {
+      font-size: 12px;
+      color: var(--secondary);
+      line-height: 1.45;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Warning box ──────────────────────────────────────────── */
+    .warning-box {
+      background: var(--yellow-bg);
+      border: 1px solid var(--yellow-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 11.5px;
+      color: #8a5c00;
+      line-height: 1.45;
+    }
+    .warning-box svg { flex-shrink: 0; margin-top: 1px; color: var(--yellow); }
+
+    /* ── Section title ────────────────────────────────────────── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    /* ── Items list ───────────────────────────────────────────── */
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 14px;
+    }
+    .items-list::-webkit-scrollbar { width: 4px; }
+    .items-list::-webkit-scrollbar-track { background: transparent; }
+    .items-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 11px 13px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
+      -webkit-app-region: no-drag;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .item-card:hover:not(.not-found) {
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    }
+    .item-card.not-found {
+      opacity: 0.45;
+      cursor: default;
+    }
+    .item-card.selected {
+      border-color: var(--accent-border);
+      background: var(--accent-bg);
+      box-shadow: 0 1px 4px rgba(255,59,48,0.08);
+    }
+
+    /* Checkbox */
+    .item-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1.5px solid #d0d0d5;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.12s;
+    }
+    .item-card.selected .item-checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .item-checkbox svg { display: none; }
+    .item-card.selected .item-checkbox svg { display: block; }
+
+    /* Text */
+    .item-info { flex: 1; min-width: 0; }
+    .item-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .item-desc {
+      font-size: 11px;
+      color: var(--secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Badges */
+    .item-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      letter-spacing: 0.01em;
+    }
+    .badge-found   { background: rgba(255,59,48,0.10); color: #d9342b; }
+    .badge-notfound{ background: var(--surface2); color: var(--secondary); }
+    .badge-admin   { background: rgba(255,159,10,0.12); color: #a06800; }
+    .badge-done    { background: rgba(52,199,89,0.12); color: #1f8a3f; }
+    .badge-error   { background: rgba(255,59,48,0.12); color: #d9342b; }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    .footer { display: flex; flex-direction: column; gap: 9px; }
+
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar-wrap.visible { display: block; }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .status-text {
+      font-size: 11.5px;
+      color: var(--secondary);
+      text-align: center;
+      min-height: 16px;
+      transition: color 0.2s;
+    }
+    .status-text.success { color: var(--green); }
+    .status-text.error   { color: var(--accent); }
+
+    .btn-row { display: flex; gap: 8px; }
+
+    .btn {
+      flex: 1;
+      padding: 11px 0;
+      border-radius: 11px;
+      border: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.13s, opacity 0.13s, transform 0.08s;
+      -webkit-app-region: no-drag;
+      outline: none;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.38; cursor: default; transform: none; }
+
+    .btn-cancel {
+      background: var(--surface);
+      color: var(--secondary);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .btn-cancel:hover:not(:disabled) { background: var(--surface2); }
+
+    .btn-uninstall {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(255,59,48,0.28);
+    }
+    .btn-uninstall:hover:not(:disabled) { background: #e0342a; }
+
+    /* ── Spinner ──────────────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* ── Done overlay ─────────────────────────────────────────── */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(245,245,247,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      animation: fadeIn 0.25s ease;
+    }
+    .done-overlay.visible { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .done-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .done-icon.success-icon { background: var(--green-bg); }
+    .done-icon.error-icon   { background: var(--accent-bg); }
+
+    .done-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .done-desc {
+      font-size: 13px;
+      color: var(--secondary);
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+    .done-btn {
+      margin-top: 8px;
+      padding: 11px 32px;
+      border-radius: 11px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: background 0.13s;
+    }
+    .done-btn.green { background: var(--green); color: #fff; }
+    .done-btn.green:hover { background: #2aa84a; }
+  </style>
+</head>
+<body>
+
+  <!-- Titlebar: empty drag region, traffic lights only -->
+  <div class="titlebar"></div>
+
+  <!-- Main -->
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="app-icon">
+        <img id="app-icon-img" src="" alt="Boida icon" />
+      </div>
+      <div class="header-text">
+        <h1>보이다(Boida) 완전 제거</h1>
+        <p>앱과 함께 설치된 모든 구성 요소를 시스템에서 깔끔하게 제거합니다.</p>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="warning-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>🔑 표시 항목은 관리자 권한이 필요합니다. GStreamer는 다른 앱에서도 사용할 수 있으니 확인 후 삭제하세요.</span>
+    </div>
+
+    <!-- Section title -->
+    <div class="section-title" id="section-label">제거 구성 요소 확인 중...</div>
+
+    <!-- Items -->
+    <div class="items-list" id="items-list"></div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="status-text" id="status-text"></div>
+      <div class="btn-row">
+        <button class="btn btn-cancel"    id="btn-cancel"    onclick="cancelOrQuit()">취소</button>
+        <button class="btn btn-uninstall" id="btn-uninstall" disabled onclick="startUninstall()">
+          제거 항목 선택 필요
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-icon success-icon" id="done-icon">✅</div>
+    <div class="done-title" id="done-title">제거 완료</div>
+    <div class="done-desc" id="done-desc">선택한 모든 항목이 시스템에서 제거되었습니다.</div>
+    <button class="done-btn green" onclick="quitApp()">확인 후 종료</button>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    const path = require('path');
+
+    // ── Load app icon ─────────────────────────────────────────
+    (function loadIcon() {
+      // Try iconset paths relative to __dirname or app.isPackaged resourcesPath
+      const candidates = [
+        path.join(__dirname, 'icon.iconset', 'icon_64x64.png'),
+        path.join(__dirname, '..', 'icon.iconset', 'icon_64x64.png'),
+        path.join(process.resourcesPath || '', 'icon.iconset', 'icon_64x64.png')
+      ];
+      const fs = require('fs');
+      for (const p of candidates) {
+        if (fs.existsSync(p)) {
+          document.getElementById('app-icon-img').src = 'file://' + p;
+          return;
+        }
+      }
+      // Fallback: emoji in styled div
+      const iconEl = document.querySelector('.app-icon');
+      iconEl.style.background = 'linear-gradient(135deg,#e8e8ed,#d1d1d6)';
+      iconEl.style.display = 'flex';
+      iconEl.style.alignItems = 'center';
+      iconEl.style.justifyContent = 'center';
+      iconEl.style.fontSize = '26px';
+      iconEl.innerHTML = '🗑️';
+    })();
+
+    // ── State ─────────────────────────────────────────────────
+    let allItems = [];
+    let selectedIds = new Set();
+    let isUninstalling = false;
+    let totalSelected = 0;
+    let doneCount = 0;
+
+    // ── Load items ────────────────────────────────────────────
+    async function loadItems() {
+      const items = await ipcRenderer.invoke('get-items');
+      allItems = items;
+
+      const list = document.getElementById('items-list');
+      list.innerHTML = '';
+
+      const foundItems    = items.filter(i => i.exists);
+      const notFoundItems = items.filter(i => !i.exists);
+
+      document.getElementById('section-label').textContent =
+        `제거 가능한 항목 (${foundItems.length}개 발견)`;
+
+      foundItems.forEach(i => selectedIds.add(i.id));
+
+      [...foundItems, ...notFoundItems].forEach(item => {
+        list.appendChild(createCard(item));
+      });
+
+      updateUninstallButton();
+    }
+
+    function createCard(item) {
+      const card = document.createElement('div');
+      card.className = [
+        'item-card',
+        !item.exists ? 'not-found' : '',
+        selectedIds.has(item.id) ? 'selected' : ''
+      ].join(' ').trim();
+      card.id = `card-${item.id}`;
+      card.onclick = () => { if (item.exists && !isUninstalling) toggleItem(item.id); };
+
+      const adminBadge = item.requiresAdmin
+        ? `<span class="item-badge badge-admin">🔑 관리자</span>` : '';
+
+      const statusStyle = item.exists
+        ? 'background:rgba(255,59,48,0.10);color:#d9342b'
+        : 'background:#f0f0f2;color:#6e6e73';
+
+      card.innerHTML = `
+        <div class="item-checkbox" id="check-${item.id}">
+          <svg viewBox="0 0 12 10" fill="none" stroke="#fff" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" width="10" height="8">
+            <polyline points="1,5 4.5,9 11,1"/>
+          </svg>
+        </div>
+        <div class="item-info">
+          <div class="item-label">${item.label}</div>
+          <div class="item-desc">${item.desc}</div>
+        </div>
+        ${adminBadge}
+        <span class="item-badge" id="badge-status-${item.id}" style="${statusStyle}">
+          ${item.exists ? '발견' : '없음'}
+        </span>`;
+      return card;
+    }
+
+    function toggleItem(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+
+      const card = document.getElementById(`card-${id}`);
+      card.classList.toggle('selected', selectedIds.has(id));
+      updateUninstallButton();
+    }
+
+    function updateUninstallButton() {
+      const btn = document.getElementById('btn-uninstall');
+      const count = [...selectedIds].filter(id => {
+        const item = allItems.find(i => i.id === id);
+        return item && item.exists;
+      }).length;
+
+      btn.disabled = count === 0;
+      btn.textContent = count === 0 ? '제거 항목 선택 필요' : `${count}개 항목 모두 제거`;
+    }
+
+    // ── Uninstall ─────────────────────────────────────────────
+    async function startUninstall() {
+      if (isUninstalling) return;
+
+      const toRemove = [...selectedIds].filter(id => {
+        const item = allItems.find(i => i.id === id);
+        return item && item.exists;
+      });
+      if (toRemove.length === 0) return;
+
+      isUninstalling = true;
+      totalSelected  = toRemove.length;
+      doneCount      = 0;
+
+      const btnU = document.getElementById('btn-uninstall');
+      const btnC = document.getElementById('btn-cancel');
+      btnU.disabled = true;
+      btnC.disabled = true;
+      btnU.innerHTML = '<span class="spinner"></span>제거 중...';
+
+      const progressWrap = document.getElementById('progress-wrap');
+      const progressBar  = document.getElementById('progress-bar');
+      const statusText   = document.getElementById('status-text');
+
+      progressWrap.classList.add('visible');
+      progressBar.style.width = '5%';
+      statusText.textContent = '관리자 권한 요청 중...';
+
+      ipcRenderer.on('uninstall-progress', (event, { id, done, error }) => {
+        doneCount++;
+        progressBar.style.width = Math.round((doneCount / totalSelected) * 100) + '%';
+
+        const item  = allItems.find(i => i.id === id);
+        const label = item ? item.label : id;
+        const badge = document.getElementById(`badge-status-${id}`);
+
+        if (error) {
+          statusText.textContent = `⚠️ ${label} 제거 실패`;
+          statusText.className = 'status-text error';
+          if (badge) {
+            badge.style.cssText = 'background:rgba(255,59,48,0.12);color:#d9342b';
+            badge.textContent = '실패';
+          }
+        } else {
+          statusText.textContent = `✓ ${label} 제거 완료`;
+          statusText.className = 'status-text success';
+          if (badge) {
+            badge.style.cssText = 'background:rgba(52,199,89,0.12);color:#1f8a3f';
+            badge.textContent = '완료';
+          }
+        }
+      });
+
+      try {
+        const results = await ipcRenderer.invoke('uninstall', toRemove);
+        progressBar.style.width = '100%';
+        const failed = results.filter(r => !r.success && !r.skipped);
+        await new Promise(r => setTimeout(r, 500));
+
+        const overlay   = document.getElementById('done-overlay');
+        const doneIcon  = document.getElementById('done-icon');
+        const doneTitle = document.getElementById('done-title');
+        const doneDesc  = document.getElementById('done-desc');
+
+        if (failed.length === 0) {
+          doneIcon.textContent = '✅';
+          doneIcon.className   = 'done-icon success-icon';
+          doneTitle.textContent = '제거 완료!';
+          doneDesc.textContent  = '선택한 모든 항목이 시스템에서 깨끗하게 제거되었습니다.';
+        } else {
+          doneIcon.textContent = '⚠️';
+          doneIcon.className   = 'done-icon error-icon';
+          doneTitle.textContent = '일부 항목 제거 실패';
+          doneDesc.textContent  = `${results.length - failed.length}/${results.length}개 항목 제거 완료. 실패 항목은 수동으로 삭제해주세요.`;
+        }
+        overlay.classList.add('visible');
+      } catch (e) {
+        statusText.textContent = '오류가 발생했습니다: ' + (e?.message || String(e));
+        statusText.className = 'status-text error';
+        btnC.disabled = false;
+        btnC.textContent = '닫기';
+        isUninstalling = false;
+      }
+    }
+
+    function cancelOrQuit() { if (!isUninstalling) quitApp(); }
+
+    async function quitApp() {
+      await ipcRenderer.invoke('quit-app');
+    }
+
+    loadItems();
+
+    // Windows는 네이티브 타이틀바를 사용하므로 HTML 드래그 영역 숨김
+    if (process.platform === 'win32') {
+      document.querySelector('.titlebar').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

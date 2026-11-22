@@ -1,0 +1,113 @@
+{
+  "name": "boida",
+  "private": true,
+  "version": "2.0.0",
+  "main": "electron.cjs",
+  "scripts": {
+    "dev": "node server.cjs",
+    "start": "electron .",
+    "build": "vite build",
+    "preview": "vite preview",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:all": "npm run build && electron-builder --mac --win"
+  },
+  "build": {
+    "appId": "com.boida.mirror",
+    "productName": "Boida",
+    "artifactName": "Boida-v${version}-${arch}.${ext}",
+    "directories": {
+      "output": "dist-app"
+    },
+    "files": [
+      "dist/**/*",
+      "electron.cjs",
+      "server.cjs",
+      "preload.cjs",
+      "index.html",
+      "package.json",
+      "src/pay_qr.png"
+    ],
+    "extraResources": [],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64",
+            "universal"
+          ]
+        }
+      ],
+      "extraResources": [
+        {
+          "from": "resources/bin/uxplay",
+          "to": "resources/bin/uxplay"
+        },
+        {
+          "from": "resources/bin/get_audio_devices.py",
+          "to": "resources/bin/get_audio_devices.py"
+        },
+        {
+          "from": "resources/gstreamer-installer.pkg",
+          "to": "resources/gstreamer-installer.pkg"
+        }
+      ],
+      "category": "public.app-category.utilities",
+      "extendInfo": {
+        "CFBundleDisplayName": "보이다(Boida)",
+        "CFBundleName": "Boida"
+      }
+    },
+    "dmg": {
+      "title": "Boida",
+      "background": "build/dmg/background.png",
+      "iconSize": 100,
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 250,
+          "type": "file"
+        },
+        {
+          "x": 390,
+          "y": 250,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "extraResources": [],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "electron": "^42.3.0",
+    "electron-builder": "^26.8.1",
+    "vite": "^8.0.14"
+  }
+}

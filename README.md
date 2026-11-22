@@ -1,12 +1,3 @@
-<p align="center">
-  <img src="/joseph.png" width="60%" alt="크리에이터 요셉" /><br />
-  "전문 개발자가 아닌 바이브 코딩을 배우는 반백살 아저씨입니다."
-</p>
-
-<br />
-<br />
-<br />
-
 # 보이다 (Boida)
 
 > **iPhone · iPad 화면을 Mac / Windows PC로 무선 미러링하는 AirPlay 수신 앱**
@@ -34,8 +25,9 @@ GStreamer 기반의 오픈소스 엔진 [UxPlay](https://github.com/antimof/UxPl
 
    | 파일 | 대상 |
    |------|------|
-   | `Boida-v1.0.0-macOS-ARM.dmg` | Apple Silicon (M1/M2/M3) 전용 |
-   | `Boida-v1.0.0-macOS-intel.dmg` | Intel Mac 전용 |
+   | `Boida-v*-universal.dmg` | Intel + Apple Silicon 통합 **(권장)** |
+   | `Boida-v*-arm64.dmg` | Apple Silicon (M1/M2/M3) 전용 |
+   | `Boida-v*-x64.dmg` | Intel Mac 전용 |
 
 2. DMG 파일을 열고 **Boida.app**을 `/Applications` 폴더로 드래그합니다.
 
@@ -51,7 +43,7 @@ GStreamer 기반의 오픈소스 엔진 [UxPlay](https://github.com/antimof/UxPl
 
 ### Windows
 
-1. [Releases 페이지](https://github.com/creatorjosephkr/Boida/releases/latest)에서 `Boida-v1.0.0-for-Windows-x64.exe` 를 다운로드합니다.
+1. [Releases 페이지](https://github.com/creatorjosephkr/Boida/releases/latest)에서 `Boida-v*-x64-Setup.exe` 를 다운로드합니다.
 
 2. 설치 파일을 실행하면 자동으로 설치됩니다.
 
@@ -89,21 +81,12 @@ GStreamer 기반의 오픈소스 엔진 [UxPlay](https://github.com/antimof/UxPl
 
 ### Boida Uninstaller 사용법
 
-#mac OS
-
-1. [Releases 페이지](https://github.com/creatorjosephkr/Boida/releases/latest)에서 `Boida-Uninstaller-for-Mac-universal.zip` 을 다운로드합니다.
+1. [Releases 페이지](https://github.com/creatorjosephkr/Boida/releases/latest)에서 `Boida-Uninstaller-universal.zip` 을 다운로드합니다.
 2. ZIP 압축을 해제합니다.
 3. **Boida Uninstaller.app** 을 더블클릭하여 실행합니다.  
    *(설치 불필요 — 어디서든 바로 실행 가능)*
 4. 제거할 항목을 선택하고 **"N개 항목 모두 제거"** 버튼을 클릭합니다.
 5. 관리자 비밀번호를 입력하면 자동으로 제거됩니다.
-
-#Windows 10/11
-1. [Releases 페이지](https://github.com/creatorjosephkr/Boida/releases/latest)에서 `Boida-Uninstaller-for-Windows.exe` 을 다운로드합니다.
-2. **Boida-Uninstaller-for-Windows.exe** 을 더블클릭하여 실행합니다.  
-   *(설치 불필요 — 어디서든 바로 실행 가능)*
-3. 제거할 항목을 선택하고 **"N개 항목 모두 제거"** 버튼을 클릭합니다.
-
 
 ### 제거 대상 항목
 
