@@ -48,10 +48,9 @@
 
 | 파일 | 플랫폼 | 설명 |
 |------|--------|------|
-| `Boida-v2.0.0-x64.exe` | Windows 10/11 | Windows 설치 파일 |
-| `Boida-v2.0.0-universal.dmg` | macOS 통합 | Apple Silicon + Intel 통합 ✅ 권장 |
-| `Boida-v2.0.0-arm64.dmg` | macOS Apple Silicon | M1 / M2 / M3 / M4 |
-| `Boida-v2.0.0-x64.dmg` | macOS Intel | 인텔 Mac 전용 |
+| `Boida-v2.0.0-macOS-arm64.dmg` | macOS Apple Silicon | M1 / M2 / M3 / M4 |
+| `Boida-v2.0.0-macOS-intel-x64.dmg` | macOS Intel | 인텔 Mac 전용 |
+| `Boida-v2.0.0-Windows-X64.exe` | Windows 10/11 (64-bit) | Windows 설치 파일 |
 
 ---
 

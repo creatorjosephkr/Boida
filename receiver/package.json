@@ -18,6 +18,7 @@
     "appId": "com.boida.mirror",
     "productName": "Boida",
     "artifactName": "Boida-v${version}-${arch}.${ext}",
+    "afterAllArtifactBuild": "./scripts/rename-artifacts.cjs",
     "directories": {
       "output": "dist-app"
     },
@@ -32,13 +33,13 @@
     ],
     "extraResources": [],
     "mac": {
+      "artifactName": "Boida-v${version}-macOS-${arch}.${ext}",
       "target": [
         {
           "target": "dmg",
           "arch": [
             "x64",
-            "arm64",
-            "universal"
+            "arm64"
           ]
         }
       ],
@@ -85,6 +86,7 @@
       ]
     },
     "win": {
+      "artifactName": "Boida-v${version}-Windows-X64.${ext}",
       "extraResources": [],
       "target": [
         {
