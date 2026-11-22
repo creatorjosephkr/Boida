@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, screen: eScreen, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, shell, screen: eScreen, ipcMain, Menu, dialog } = require('electron');
 const path = require('path');
 const net = require('net');
 const fs = require('fs');
@@ -77,7 +77,7 @@ const STREAM_PRESETS = {
     jpegQuality: 75,
   },
 };
-let currentQualityPreset = 'balanced';
+let currentQualityPreset = 'ultra';
 
 // ── macOS CoreAudio Device Helper ─────────────────────────────
 function getMacOSAudioDevices(targetDevId = null) {
@@ -553,7 +553,7 @@ function startAirPlay(targetAudioDeviceId = null, targetQualityPreset = null) {
     if (d) resizeWindow(d.w, d.h);
   });
 
-  const preset = STREAM_PRESETS[currentQualityPreset] || STREAM_PRESETS.balanced;
+  const preset = STREAM_PRESETS[currentQualityPreset] || STREAM_PRESETS.ultra;
   console.log(`[보이다] Starting AirPlay with preset: ${preset.name} (${preset.resolution}, ${preset.fps}fps, jpegQuality=${preset.jpegQuality})`);
 
   const uxplayArgs = [
@@ -690,10 +690,57 @@ function findGStreamerRootWin() {
   return null;
 }
 
+// ── macOS Application Menu ────────────────────────────────────
+function setupMacMenu() {
+  app.setAboutPanelOptions({
+    applicationName: '보이다 (Boida)',
+    applicationVersion: app.getVersion(),
+    copyright: 'Copyright © 2026 CREATOR JOSEPH',
+    credits: 'creatorjoseph@kakao.com',
+  });
+
+  const template = [
+    {
+      label: app.name,
+      submenu: [
+        { label: 'About', role: 'about' },
+        {
+          label: '업데이트 확인',
+          click: () => checkForUpdates(true),
+        },
+        { type: 'separator' },
+        {
+          label: '개발자 블로그',
+          click: () => shell.openExternal('https://blog.naver.com/josephk1010'),
+        },
+        {
+          label: '개발자후원',
+          click: () => {
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              if (mainWindow.isMinimized()) mainWindow.restore();
+              mainWindow.show();
+              mainWindow.focus();
+              mainWindow.webContents.send('open-sponsor-modal');
+            }
+          },
+        },
+        { type: 'separator' },
+        { label: '종료', accelerator: 'CmdOrCtrl+Q', role: 'quit' },
+      ],
+    },
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 // ── Electron Window ───────────────────────────────────────────
 function createWindow() {
-  // Windows: 메뉴바 제거
-  if (process.platform === 'win32') Menu.setApplicationMenu(null);
+  if (process.platform === 'darwin') {
+    setupMacMenu();
+  } else if (process.platform === 'win32') {
+    // Windows: 메뉴바 제거
+    Menu.setApplicationMenu(null);
+  }
 
   mainWindow = new BrowserWindow({
     width: 390,
@@ -967,9 +1014,41 @@ ipcMain.on('audio-device-changed', () => {
 });
 
 // ── GitHub 최신 버전 체크 ─────────────────────────────────────────
-function checkForUpdates() {
+function showUpdateMessageBox(options) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    return dialog.showMessageBox(mainWindow, options);
+  }
+  return dialog.showMessageBox(options);
+}
+
+function checkForUpdates(isManual = false) {
   const currentVersion = app.getVersion(); // package.json의 version 값
   const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+  let handled = false;
+
+  const showUpToDate = () => {
+    if (!isManual || handled) return;
+    handled = true;
+    showUpdateMessageBox({
+      type: 'info',
+      title: '업데이트 확인',
+      message: '최신 버전입니다.',
+      detail: `현재 보이다(Boida) v${currentVersion}을 사용 중입니다.`,
+      buttons: ['확인'],
+    }).catch(() => {});
+  };
+
+  const showUpdateError = () => {
+    if (!isManual || handled) return;
+    handled = true;
+    showUpdateMessageBox({
+      type: 'warning',
+      title: '업데이트 확인',
+      message: '업데이트를 확인할 수 없습니다.',
+      detail: '네트워크 연결을 확인한 후 다시 시도해 주세요.',
+      buttons: ['확인'],
+    }).catch(() => {});
+  };
 
   const req = https.get(apiUrl, {
     headers: { 'User-Agent': 'Boida-App', 'Accept': 'application/vnd.github.v3+json' }
@@ -980,7 +1059,10 @@ function checkForUpdates() {
       try {
         const release = JSON.parse(data);
         const latestTag = (release.tag_name || '').replace(/^v/, '');
-        if (!latestTag) return;
+        if (!latestTag) {
+          showUpToDate();
+          return;
+        }
 
         // 버전 비교: semver 방식 (major.minor.patch)
         const parse = v => v.split('.').map(Number);
@@ -992,7 +1074,8 @@ function checkForUpdates() {
           (latMaj === curMaj && latMin > curMin) ||
           (latMaj === curMaj && latMin === curMin && latPat > curPat);
 
-        if (isNewer && mainWindow) {
+        if (isNewer && mainWindow && !mainWindow.isDestroyed()) {
+          handled = true;
           mainWindow.webContents.send('update-available', {
             currentVersion,
             latestVersion: latestTag,
@@ -1000,14 +1083,18 @@ function checkForUpdates() {
             releaseName: release.name || `v${latestTag}`,
             releaseNotes: (release.body || '').slice(0, 400) // 최대 400자
           });
+        } else {
+          showUpToDate();
         }
       } catch (e) {
         console.log('[보이다] 업데이트 확인 파싱 오류:', e.message);
+        showUpdateError();
       }
     });
   });
   req.on('error', (e) => {
     console.log('[보이다] 업데이트 확인 네트워크 오류:', e.message);
+    showUpdateError();
   });
   req.setTimeout(8000, () => req.destroy());
 }

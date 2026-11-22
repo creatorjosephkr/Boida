@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import sponIcon from './assets/spon/spon.svg';
+import kakaobankImg from './assets/spon/kakaobank.png';
+import paypalImg from './assets/spon/paypal.png';
 
 const HEADER_H = 38;
 const IS_WIN = typeof navigator !== 'undefined' && /Windows/i.test(navigator.userAgent);
@@ -1096,6 +1099,7 @@ export default function App() {
   const [qualityInfo, setQualityInfo] = useState(null);
   const [rotation, setRotation] = useState(0); // 0, 90, 180, 270
   const [autoRotate, setAutoRotate] = useState(false);
+  const [showSponsorModal, setShowSponsorModal] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const toastTimerRef = useRef(null);
 
@@ -1544,6 +1548,9 @@ export default function App() {
       };
       window.ipcRenderer.on('audio-devices-updated', handleAudioUpdate);
 
+      const handleOpenSponsor = () => setShowSponsorModal(true);
+      window.ipcRenderer.on('open-sponsor-modal', handleOpenSponsor);
+
       const handleDeviceChange = () => {
         window.ipcRenderer.send('audio-device-changed');
         window.ipcRenderer.invoke('get-audio-devices').then(info => {
@@ -1567,6 +1574,7 @@ export default function App() {
         window.ipcRenderer.removeListener('uxplay-download-done',     handleDlDone);
         window.ipcRenderer.removeListener('uxplay-download-error',    handleDlError);
         window.ipcRenderer.removeListener('audio-devices-updated',    handleAudioUpdate);
+        window.ipcRenderer.removeListener('open-sponsor-modal',       handleOpenSponsor);
         window.ipcRenderer.removeListener('rotation-changed',         handleRotation);
         if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
           navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
@@ -1886,6 +1894,34 @@ export default function App() {
             width: '100%',
             marginBottom: 8,
           }}>
+            <button
+              onClick={() => setShowSponsorModal(true)}
+              title="개발자 후원"
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'linear-gradient(145deg, #2c2c2e 0%, #1c1c1e 100%)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-1px) scale(1.04)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.08)';
+              }}
+            >
+              <img src={sponIcon} alt="후원" style={{ width: 24, height: 24, display: 'block' }} />
+            </button>
+
             {/* Copyright Statement */}
             <div style={{
               fontSize: '11px',
@@ -2198,6 +2234,204 @@ export default function App() {
               }}
             >
               나중에
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sponsor Modal */}
+      {showSponsorModal && (
+        <div
+          onClick={() => setShowSponsorModal(false)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'rgba(255, 255, 255, 0.96)',
+              borderRadius: 22,
+              padding: '22px 20px 18px',
+              width: 344,
+              maxWidth: 'calc(100% - 32px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              boxShadow: '0 30px 60px rgba(0,0,0,0.4), inset 0 0 0 0.5px rgba(255,255,255,0.4)',
+              animation: 'scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 6,
+            }}>
+              <div style={{ width: 24 }} />
+              <div style={{ fontSize: 16, fontWeight: 700, color: C.titleText }}>
+                개발자 후원
+              </div>
+              <button
+                onClick={() => setShowSponsorModal(false)}
+                aria-label="닫기"
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: 'rgba(0,0,0,0.06)',
+                  color: C.secondary,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{
+              fontSize: 12,
+              color: C.secondary,
+              textAlign: 'center',
+              lineHeight: 1.45,
+              marginBottom: 16,
+            }}>
+              보이다(Boida)를 유용하게 사용하셨다면<br />따뜻한 커피 한 잔으로 개발을 응원해 주세요.
+            </div>
+
+            {/* 2-Column Sponsor Cards */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              width: '100%',
+              marginBottom: 16,
+            }}>
+              {/* Left: KakaoBank */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: 16,
+                padding: '12px 10px',
+                border: '1px solid rgba(0,0,0,0.08)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 8,
+              }}>
+                <div style={{
+                  width: 108,
+                  height: 108,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#ffffff',
+                  borderRadius: 10,
+                  padding: 4,
+                }}>
+                  <img
+                    src={kakaobankImg}
+                    alt="카카오뱅크 QR"
+                    style={{ width: 108, height: 108, objectFit: 'contain', display: 'block' }}
+                  />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.titleText }}>카카오뱅크</div>
+                  <div style={{ fontSize: 10.5, color: C.secondary, marginTop: 2 }}>QR 스캔 송금</div>
+                </div>
+              </div>
+
+              {/* Right: PayPal */}
+              <button
+                onClick={() => {
+                  const url = 'https://www.paypal.com/paypalme/tech1010';
+                  if (window.ipcRenderer) {
+                    window.ipcRenderer.invoke('open-external', url).catch(() => {});
+                  } else {
+                    window.open(url, '_blank');
+                  }
+                }}
+                style={{
+                  background: '#ffffff',
+                  borderRadius: 16,
+                  padding: '12px 10px',
+                  border: '1px solid rgba(0,122,255,0.18)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,122,255,0.12)';
+                  e.currentTarget.style.borderColor = 'rgba(0,122,255,0.4)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(0,122,255,0.18)';
+                }}
+              >
+                <div style={{
+                  width: 108,
+                  height: 108,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f7f9fc',
+                  borderRadius: 10,
+                }}>
+                  <img
+                    src={paypalImg}
+                    alt="PayPal"
+                    style={{ width: 72, height: 72, objectFit: 'contain', display: 'block' }}
+                  />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.titleText }}>PayPal</div>
+                  <div style={{ fontSize: 10.5, color: C.accent, fontWeight: 600, marginTop: 2 }}>클릭하여 이동 ↗</div>
+                </div>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowSponsorModal(false)}
+              style={{
+                width: '100%',
+                background: 'rgba(0,0,0,0.06)',
+                border: 'none',
+                borderRadius: 12,
+                padding: '10px 0',
+                fontSize: 13,
+                fontWeight: 600,
+                color: C.titleText,
+                cursor: 'pointer',
+                fontFamily: 'system-ui',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.06)'; }}
+            >
+              닫기
             </button>
           </div>
         </div>
