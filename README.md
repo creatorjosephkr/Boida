@@ -25,7 +25,7 @@ GStreamer 기반의 오픈소스 엔진 [UxPlay](https://github.com/antimof/UxPl
 
    | 파일 | 대상 |
    |------|------|
-   | `Boida-v2.0.0-macOS-arm64.dmg` | Apple Silicon (M1~M4) 전용 |
+   | `Boida-v2.0.0-macOS-arm64.dmg` | Apple Silicon (M시리즈) 전용 |
    | `Boida-v2.0.0-macOS-intel-x64.dmg` | Intel Mac 전용 |
 
 2. DMG 파일을 열고 **Boida.app**을 `/Applications` 폴더로 드래그합니다.
